@@ -10,8 +10,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // 🚀 LANGSUNG REDIRECT KE CDN ASLI
-    // Vercel hanya memproses header (beberapa Byte), TIDAK MENGUNDUH VIDEO!
+    // 🚀 REDIRECT LANGSUNG KE CDN ASLI
     return NextResponse.redirect(urlParam, 302);
   } catch (error) {
     return new Response(`Redirect error: ${error}`, { status: 500 });
