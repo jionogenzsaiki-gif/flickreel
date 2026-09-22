@@ -1,6 +1,7 @@
 import { safeJson, encryptedResponse } from "@/lib/api-utils";
-import { optimizeCover } from "@/lib/image-utils";
 import { NextRequest } from "next/server";
+
+export const dynamic = "force-dynamic";
 
 const UPSTREAM_API = (process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.sansekai.my.id/api") + "/flickreels";
 
@@ -44,7 +45,8 @@ export async function GET(request: NextRequest) {
       episodeTitle: ep.chapter_title || "",
       episodeNumber: ep.chapter_num,
       totalDuration: ep.total_duration || 0,
-      hlsUrl: ep.hls_url ? `/api/flickreels/hls?url=${encodeURIComponent(ep.hls_url)}` : "",
+      // 🚀 LANGSUNG PAKAI URL ASLI (0 BYTE PROXY DI VERCEL)
+      hlsUrl: ep.hls_url || "",
     });
   } catch (error) {
     console.error("FlickReels Episode Error:", error);
