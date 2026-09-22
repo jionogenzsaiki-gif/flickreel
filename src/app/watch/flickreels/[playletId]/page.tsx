@@ -2,12 +2,18 @@
 
 import { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import { useFlickReelsEpisode, useFlickReelsDetail } from "@/hooks/useFlickReels";
-import { ChevronLeft, ChevronRight, Loader2, AlertCircle, List, Play, RefreshCw, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, AlertCircle, List, Play, RefreshCw, X, Settings } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Hls from "hls.js";
 import { getWatchSession, updateWatchSession } from "@/lib/watch-session";
-import { addToHistory } from "@/lib/history"; // <-- Terhubung ke helper storage
+import { addToHistory } from "@/lib/history";
+
+interface QualityLevel {
+  id: number;
+  label: string;
+  height: number;
+}
 
 function FlickReelsWatchContent() {
   const params = useParams();
@@ -20,6 +26,12 @@ function FlickReelsWatchContent() {
   const session = getWatchSession(currentToken);
   const [currentEpisode, setCurrentEpisode] = useState(session?.episodeNumber || 1);
   const [showEpisodeList, setShowEpisodeList] = useState(false);
+  
+  // State Resolusi Video
+  const [qualities, setQualities] = useState<QualityLevel[]>([]);
+  const [currentQuality, setCurrentQuality] = useState<number>(-1); // -1 = Auto
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
 
@@ -37,7 +49,7 @@ function FlickReelsWatchContent() {
   const cover = detailData?.cover || "";
   const videoUrl = episodeData?.hlsUrl || null;
 
-  // --- OTOMATIS SIMPAN KE RIWAYAT SAAT DITONTON ---
+  // OTOMATIS SIMPAN KE RIWAYAT SAAT DITONTON
   useEffect(() => {
     if (playletId && title) {
       addToHistory({
@@ -59,7 +71,7 @@ function FlickReelsWatchContent() {
     }
   }, [currentEpisode, totalEpisodes, playletId, currentToken]);
 
-  // Handle pemuatan & reset video secara bersih saat videoUrl berubah
+  // Handle pemuatan, pembersihan cache, dan HLS resolution levels
   useEffect(() => {
     if (!videoUrl || !videoRef.current) return;
     const video = videoRef.current;
@@ -73,25 +85,58 @@ function FlickReelsWatchContent() {
     video.removeAttribute("src");
     video.load();
 
+    // Mencegah cache dengan menambahkan parameter timestamp pada URL
+    const noCacheUrl = videoUrl.includes("?") 
+      ? `${videoUrl}&_t=${Date.now()}` 
+      : `${videoUrl}?_t=${Date.now()}`;
+
     if (Hls.isSupported()) {
       const hls = new Hls({
         debug: false,
         enableWorker: true,
         lowLatencyMode: true,
-        backBufferLength: 90,
+        // DILARANG MENYIMPAN CACHE ATAU BUFFER PANJANG
+        maxBufferLength: 10, // Menjaga buffer tetap singkat (10 detik)
+        maxMaxBufferLength: 20,
+        backBufferLength: 0, // Hapus video segmen lama di belakang timeline
+        // Header khusus untuk instruksi Tanpa Cache ke server
+        fetchSetup: (context, init) => {
+          init.headers = new Headers(init.headers || {});
+          init.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+          init.headers.set("Pragma", "no-cache");
+          init.headers.set("Expires", "0");
+          return new Request(context.url, init);
+        },
       });
 
       hlsRef.current = hls;
-      hls.loadSource(videoUrl);
+      hls.loadSource(noCacheUrl);
       hls.attachMedia(video);
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        // Ambil daftar resolusi yang tersedia dari file manifest HLS (.m3u8)
+        const levels: QualityLevel[] = hls.levels.map((level, index) => ({
+          id: index,
+          label: `${level.height}p`,
+          height: level.height,
+        }));
+        setQualities(levels);
+        setCurrentQuality(-1); // Setel default ke Auto
+
         const playPromise = video.play();
         if (playPromise !== undefined) {
           playPromise.catch(() => {
             video.muted = true;
             video.play().catch((err) => console.error("Autoplay Error:", err));
           });
+        }
+      });
+
+      hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
+        if (hls.autoLevelEnabled) {
+          setCurrentQuality(-1);
+        } else {
+          setCurrentQuality(data.level);
         }
       });
 
@@ -111,7 +156,7 @@ function FlickReelsWatchContent() {
         }
       });
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = videoUrl;
+      video.src = noCacheUrl;
       video.load();
       video.play().catch(() => {
         video.muted = true;
@@ -126,6 +171,14 @@ function FlickReelsWatchContent() {
       }
     };
   }, [videoUrl]);
+
+  // Fungsi mengganti resolusi kualitas video
+  const changeQuality = (levelIndex: number) => {
+    if (!hlsRef.current) return;
+    hlsRef.current.currentLevel = levelIndex; // -1 untuk Auto
+    setCurrentQuality(levelIndex);
+    setShowQualityMenu(false);
+  };
 
   const goToEpisode = (ep: number) => {
     setCurrentEpisode(ep);
@@ -166,15 +219,71 @@ function FlickReelsWatchContent() {
             </div>
           </div>
 
-          <button 
-            onClick={() => setShowEpisodeList(!showEpisodeList)} 
-            className="p-2.5 text-white/90 hover:text-white transition-all rounded-2xl bg-black/20 hover:bg-white/10 border border-white/5 backdrop-blur-md active:scale-95"
-            aria-label="Daftar Episode"
-          >
-            <List className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Tombol Pengatur Resolusi */}
+            {qualities.length > 0 && (
+              <button 
+                onClick={() => setShowQualityMenu(!showQualityMenu)} 
+                className="p-2.5 text-white/90 hover:text-white transition-all rounded-2xl bg-black/20 hover:bg-white/10 border border-white/5 backdrop-blur-md active:scale-95 flex items-center gap-1 text-xs font-semibold"
+                aria-label="Pilih Resolusi"
+              >
+                <Settings className="w-4 h-4" />
+                <span>
+                  {currentQuality === -1 
+                    ? "Auto" 
+                    : qualities.find((q) => q.id === currentQuality)?.label || "HD"}
+                </span>
+              </button>
+            )}
+
+            {/* Tombol Daftar Episode */}
+            <button 
+              onClick={() => setShowEpisodeList(!showEpisodeList)} 
+              className="p-2.5 text-white/90 hover:text-white transition-all rounded-2xl bg-black/20 hover:bg-white/10 border border-white/5 backdrop-blur-md active:scale-95"
+              aria-label="Daftar Episode"
+            >
+              <List className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Pop-up Dialog Pemilih Resolusi / Kualitas */}
+      {showQualityMenu && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[80] flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-white/10 rounded-2xl p-4 w-full max-w-xs space-y-3 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <h3 className="text-white font-bold text-sm">Resolusi Video</h3>
+              <button onClick={() => setShowQualityMenu(false)} className="text-white/60 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="space-y-1">
+              <button
+                onClick={() => changeQuality(-1)}
+                className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-colors flex items-center justify-between ${
+                  currentQuality === -1 ? "bg-primary text-white font-bold" : "text-white/80 hover:bg-white/10"
+                }`}
+              >
+                <span>Otomatis (Auto)</span>
+                {currentQuality === -1 && <span className="text-[10px]">Aktif</span>}
+              </button>
+              {qualities.map((q) => (
+                <button
+                  key={q.id}
+                  onClick={() => changeQuality(q.id)}
+                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-colors flex items-center justify-between ${
+                    currentQuality === q.id ? "bg-primary text-white font-bold" : "text-white/80 hover:bg-white/10"
+                  }`}
+                >
+                  <span>{q.label}</span>
+                  {currentQuality === q.id && <span className="text-[10px]">Aktif</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Video Stage */}
       <div className="flex-1 w-full h-full relative bg-black flex items-center justify-center">
