@@ -45,35 +45,75 @@ function FlickReelsWatchContent() {
     }
   }, [currentEpisode, totalEpisodes, playletId, currentToken]);
 
+  // Handle pemuatan & reset video secara bersih saat videoUrl berubah
   useEffect(() => {
     if (!videoUrl || !videoRef.current) return;
     const video = videoRef.current;
 
+    // 1. Bersihkan instansi Hls lama & Hentikan pemutaran sebelumnya
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
     }
 
+    video.pause();
+    video.removeAttribute("src");
+    video.load();
+
+    // 2. Inisialisasi Player Baru
     if (Hls.isSupported()) {
-      const hls = new Hls({ debug: false, enableWorker: true });
+      const hls = new Hls({
+        debug: false,
+        enableWorker: true,
+        lowLatencyMode: true,
+        backBufferLength: 90,
+      });
+
       hlsRef.current = hls;
       hls.loadSource(videoUrl);
       hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play().catch(() => {}); });
-      hls.on(Hls.Events.ERROR, (_event, data) => {
-        if (data.fatal) { 
-          console.error("HLS Fatal Error:", data.type, data.details); 
-          hls.destroy(); 
+
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // Jika diproteksi autoplay, jalankan mute dulu baru play
+            video.muted = true;
+            video.play().catch((err) => console.error("Autoplay Error:", err));
+          });
         }
       });
-    } else {
+
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (data.fatal) {
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              hls.recoverMediaError();
+              break;
+            default:
+              hls.destroy();
+              break;
+          }
+        }
+      });
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      // Untuk browser yang mendukung Native HLS (misal Safari / iOS)
       video.src = videoUrl;
       video.load();
-      video.play().catch(() => {});
+      video.play().catch(() => {
+        video.muted = true;
+        video.play().catch(() => {});
+      });
     }
 
     return () => {
-      if (hlsRef.current) { hlsRef.current.destroy(); hlsRef.current = null; }
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
     };
   }, [videoUrl]);
 
