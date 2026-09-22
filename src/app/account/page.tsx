@@ -94,7 +94,7 @@ export default function AccountPage() {
             <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
               <Info className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-white">Tentang SekaiDrama</span>
+            <span className="text-sm font-medium text-white">Tentang FlickReels Lite</span>
           </div>
           <span className="text-xs text-zinc-400 font-medium">Platform Streaming</span>
         </div>
