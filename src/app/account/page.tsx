@@ -29,8 +29,8 @@ export default function AccountPage() {
             <User className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white tracking-wide">Pengguna SekaiDrama</h1>
-            <p className="text-xs text-zinc-400 font-medium">SekaiDrama Lite v1.0.0.2026.v1-lite</p>
+            <h1 className="text-lg font-bold text-white tracking-wide">Pengguna FlickReels Lite</h1>
+            <p className="text-xs text-zinc-400 font-medium">FlickReels Lite v1.0.0.2026.v1-lite</p>
           </div>
         </div>
 
