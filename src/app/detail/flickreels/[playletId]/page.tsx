@@ -22,7 +22,7 @@ export default function FlickReelsDetailPage() {
       <div className="min-h-screen pt-24 px-4">
         <UnifiedErrorDisplay 
           title="Drama tidak ditemukan"
-          message="Tidak dapat memuat detail drama FlickReels Lite. Silakan coba lagi atau kembali ke beranda."
+          message="Tidak dapat memuat detail drama dari FlickReels Lite. Silakan coba lagi atau kembali ke beranda."
           onRetry={() => refetch()}
           retryLabel="Coba Lagi"
         />
@@ -30,8 +30,8 @@ export default function FlickReelsDetailPage() {
     );
   }
 
-  const handleWatch = (epNum = 1) => {
-    const token = createWatchToken({ platform: 'flickreels', bookId: playletId, episodeNumber: epNum });
+  const handleWatch = (episodeNumber = 1) => {
+    const token = createWatchToken({ platform: 'flickreels', bookId: playletId, episodeNumber });
     router.push(`/watch/flickreels/${playletId}?t=${token}`);
   };
 
@@ -80,13 +80,14 @@ export default function FlickReelsDetailPage() {
               </div>
             </div>
 
-            {/* Drama Info */}
+            {/* Informasi Drama */}
             <div className="space-y-6">
               <div>
                 <h1 className="text-3xl md:text-5xl font-extrabold font-display gradient-text mb-4">
                   {data.title}
                 </h1>
 
+                {/* Badge Episode Info */}
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-muted/50 border border-border/50">
                     <Film className="w-4 h-4 text-primary" />
@@ -94,6 +95,7 @@ export default function FlickReelsDetailPage() {
                   </div>
                 </div>
 
+                {/* Label / Genre */}
                 {data.labels && data.labels.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-4">
                     {data.labels.map((label: string, idx: number) => (
@@ -113,7 +115,7 @@ export default function FlickReelsDetailPage() {
                 </p>
               </div>
 
-              {/* Tombol Mulai Nonton */}
+              {/* Tombol Utama */}
               <button 
                 onClick={() => handleWatch(1)} 
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-white transition-all hover:scale-105 shadow-xl shadow-primary/25 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
@@ -124,7 +126,7 @@ export default function FlickReelsDetailPage() {
             </div>
           </div>
 
-          {/* Daftar Episode */}
+          {/* Grid Daftar Episode */}
           {episodes.length > 0 && (
             <div className="mt-12 space-y-4">
               <div className="flex items-center gap-2 border-b border-border/50 pb-3">
