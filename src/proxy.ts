@@ -1,60 +1,62 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-// Simple in-memory store for rate limiting
+// Store in-memory untuk rate limit
 const rateLimit = new Map<string, { count: number; startTime: number }>();
 
 export function middleware(request: NextRequest) {
-  // Hanya jalankan rate limiting untuk endpoint /api
-  if (!request.nextUrl.pathname.startsWith('/api')) {
-    return NextResponse.next();
+  // Ambil IP pengguna dari header proxy (Vercel/Cloudflare)
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  let ip = forwardedFor ? forwardedFor.split(',')[0].trim() : '127.0.0.1';
+  
+  if (ip === '::1' || !ip) {
+    ip = '127.0.0.1';
   }
 
-  // Identifikasi IP pengguna
-  let ip = request.headers.get('x-forwarded-for')?.split(',')[0] ?? '127.0.0.1';
-  if (ip === '::1') ip = '127.0.0.1';
-
-  const limit = 150; // Batas request per window
-  const windowMs = 60 * 1000; // Window 1 menit
-
+  const limit = 150; // Maksimal 150 request
+  const windowMs = 60 * 1000; // Window 1 menit (60.000 ms)
   const now = Date.now();
 
-  if (!rateLimit.has(ip)) {
-    rateLimit.set(ip, { count: 0, startTime: now });
-  }
-
-  const data = rateLimit.get(ip)!;
-
-  // Reset window jika waktu window sudah berlalu
-  if (now - data.startTime > windowMs) {
-    data.count = 0;
-    data.startTime = now;
-  }
-
-  data.count++;
-
-  // Cek apakah melampaui batas
-  if (data.count > limit) {
-    return new NextResponse(
-      JSON.stringify({ 
-        success: false, 
-        message: 'Too Many Requests',
-        error: "Terlalu banyak permintaan. Mohon tunggu sebentar."
-      }),
-      { 
-        status: 429, 
-        headers: { 
-          'content-type': 'application/json',
-          'Retry-After': '60'
-        } 
+  // Pembersihan otomatis memori untuk IP yang expired (cegah memory leak)
+  if (rateLimit.size > 1000) {
+    for (const [key, value] of rateLimit.entries()) {
+      if (now - value.startTime > windowMs) {
+        rateLimit.delete(key);
       }
-    );
+    }
+  }
+
+  // Cek atau buat record rate limit untuk IP saat ini
+  const record = rateLimit.get(ip);
+
+  if (!record || now - record.startTime > windowMs) {
+    rateLimit.set(ip, { count: 1, startTime: now });
+  } else {
+    record.count++;
+    
+    // Jika melebihi batas request
+    if (record.count > limit) {
+      return new NextResponse(
+        JSON.stringify({ 
+          success: false, 
+          message: 'Too Many Requests',
+          error: 'Terlalu banyak permintaan. Mohon tunggu sebentar.'
+        }),
+        { 
+          status: 429, 
+          headers: { 
+            'Content-Type': 'application/json',
+            'Retry-After': '60'
+          } 
+        }
+      );
+    }
   }
 
   return NextResponse.next();
 }
 
-// Konfigurasi matcher
+// Matcher: Hanya mengeksekusi middleware untuk semua endpoint /api/
 export const config = {
   matcher: '/api/:path*',
 };
