@@ -19,7 +19,8 @@ export default function AccountPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-black text-white pb-28 pt-6 px-4 max-w-md md:max-w-2xl mx-auto">
+    /* Perbaikan: pt-20 diubah menjadi pt-24 agar tidak mepet ke header atas */
+    <main className="min-h-screen bg-black text-white pb-28 pt-24 px-4 max-w-md md:max-w-2xl mx-auto">
       {/* Header Profile Card */}
       <div className="relative bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-white/10 rounded-3xl p-6 shadow-xl mb-6 overflow-hidden">
         <div className="absolute -right-6 -bottom-6 w-28 h-28 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
