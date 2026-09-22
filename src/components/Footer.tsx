@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sparkles, Heart, Film, ShieldCheck, Zap } from "lucide-react";
+import { Sparkles, Film, ShieldCheck, Zap, Clapperboard } from "lucide-react";
 
 export function Footer() {
   const pathname = usePathname();
@@ -37,31 +37,30 @@ export function Footer() {
 
           {/* Slogan / Short Description */}
           <p className="text-sm text-muted-foreground/90 max-w-md leading-relaxed">
-            Platform streaming drama pendek terbaik. Nikmati ribuan serial menarik secara gratis dengan kualitas HD tanpa hambatan.
+            Platform hiburan drama pendek gratis terlengkap. Tonton ribuan episode menarik kapan saja dengan pengalaman streaming tanpa hambatan.
           </p>
 
           {/* Feature Badges */}
           <div className="flex flex-wrap items-center justify-center gap-3 py-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white/5 border border-white/10 text-zinc-300 backdrop-blur-md">
-              <Zap className="w-3.5 h-3.5 text-amber-400" /> Fast Streaming
+              <Zap className="w-3.5 h-3.5 text-amber-400" /> Super Cepat
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white/5 border border-white/10 text-zinc-300 backdrop-blur-md">
-              <Film className="w-3.5 h-3.5 text-primary" /> HD Resolution
+              <Film className="w-3.5 h-3.5 text-primary" /> Kualitas HD
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white/5 border border-white/10 text-zinc-300 backdrop-blur-md">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Free Access
+              <Clapperboard className="w-3.5 h-3.5 text-indigo-400" /> Ribuan Drama
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white/5 border border-white/10 text-zinc-300 backdrop-blur-md">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Gratis Akses
             </span>
           </div>
 
           <div className="w-full max-w-xs h-px bg-white/10 my-2" />
 
-          {/* Copyright & Maker Info */}
+          {/* Copyright Clean Info */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-muted-foreground font-medium">
-            <p>© {new Date().getFullYear()} FlickReels Lite. All rights reserved.</p>
-            <span className="hidden sm:inline text-white/20">•</span>
-            <p className="flex items-center gap-1">
-              Crafted with <Heart className="w-3.5 h-3.5 text-red-500 fill-current animate-pulse" /> by <span className="text-foreground font-semibold">Yusril</span>
-            </p>
+            <p>© {new Date().getFullYear()} FlickReels Lite. Hak Cipta Dilindungi.</p>
           </div>
 
         </div>
