@@ -1,14 +1,5 @@
-import QrisDonationPopup from '@/components/QrisDonationPopup';
+"use client";
 
-export default function DetailLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <>
-      {children}
-      {/* <QrisDonationPopup /> */}
-    </>
-  );
+export default function QrisDonationPopup() {
+  return null;
 }
