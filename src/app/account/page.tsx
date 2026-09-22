@@ -19,7 +19,7 @@ export default function AccountPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-black text-white pb-28 pt-6 px-4 max-w-md mx-auto">
+    <main className="min-h-screen bg-black text-white pb-28 pt-6 px-4 max-w-md md:max-w-2xl mx-auto">
       {/* Header Profile Card */}
       <div className="relative bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-white/10 rounded-3xl p-6 shadow-xl mb-6 overflow-hidden">
         <div className="absolute -right-6 -bottom-6 w-28 h-28 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
@@ -29,8 +29,8 @@ export default function AccountPage() {
             <User className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white tracking-wide">Pengguna FlickReels</h1>
-            <p className="text-xs text-zinc-400 font-medium">FlickReels Lite v1.0.0</p>
+            <h1 className="text-lg font-bold text-white tracking-wide">Pengguna SekaiDrama</h1>
+            <p className="text-xs text-zinc-400 font-medium">SekaiDrama Lite v1.0.0.2026.v1-lite</p>
           </div>
         </div>
 
@@ -86,7 +86,7 @@ export default function AccountPage() {
             </div>
             <span className="text-sm font-medium text-white">Versi Aplikasi</span>
           </div>
-          <span className="text-xs text-zinc-400 font-bold bg-white/5 px-2.5 py-1 rounded-lg">v1.0.0 Stable</span>
+          <span className="text-xs text-zinc-400 font-bold bg-white/5 px-2.5 py-1 rounded-lg">v1.0.0.2026.v1-lite</span>
         </div>
 
         <div className="flex items-center justify-between p-4 rounded-2xl bg-zinc-900/80 border border-white/5">
