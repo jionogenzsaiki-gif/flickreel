@@ -81,22 +81,22 @@ export function Header() {
   const isSearching = isPineDrama
     ? isSearchingPineDrama
     : isDramaBox
-      ? isSearchingDramaBox
-      : isReelShort
-        ? isSearchingReelShort
-        : isShortMax
-          ? isSearchingShortMax
-          : isNetShort
-            ? isSearchingNetShort
-            : isMelolo
-              ? isSearchingMelolo
-              : isFreeReels
-                ? isSearchingFreeReels
-                : isDramaNova
-                  ? isSearchingDramaNova
-                  : isGoodShort
-                    ? isSearchingGoodShort
-                    : isSearchingFlickReels;
+    ? isSearchingDramaBox
+    : isReelShort
+      ? isSearchingReelShort
+      : isShortMax
+        ? isSearchingShortMax
+        : isNetShort
+          ? isSearchingNetShort
+          : isMelolo
+            ? isSearchingMelolo
+            : isFreeReels
+              ? isSearchingFreeReels
+              : isDramaNova
+                ? isSearchingDramaNova
+                : isGoodShort
+                  ? isSearchingGoodShort
+                  : isSearchingFlickReels;
 
   // Search results processing
   const searchResults = isPineDrama
@@ -139,14 +139,14 @@ export function Header() {
           {/* Logo & Brand Name */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="relative w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
-              {/* Tempat Gambar Logo (Ganti /flickreels.webp dengan path gambar kamu di folder public) */}
               <img
                 src="/flickreels.webp"
                 alt="FlickReels Lite Logo"
                 className="w-full h-full object-cover rounded-xl"
               />
             </div>
-            <span className="font-display font-bold text-xl gradient-text">
+            {/* Ubah warna teks judul di sini (misal: text-white atau text-primary) */}
+            <span className="font-display font-bold text-xl text-white">
               FlickReels Lite
             </span>
           </Link>
