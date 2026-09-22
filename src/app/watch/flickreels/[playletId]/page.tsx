@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import { useFlickReelsEpisode, useFlickReelsDetail } from "@/hooks/useFlickReels";
 import { ChevronLeft, ChevronRight, Loader2, AlertCircle, List, Play, RefreshCw, X } from "lucide-react";
 import Link from "next/link";
@@ -8,10 +8,10 @@ import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Hls from "hls.js";
 import { getWatchSession, updateWatchSession } from "@/lib/watch-session";
 
-export default function FlickReelsWatchPage() {
-  const params = useParams<{ playletId: string }>();
+function FlickReelsWatchContent() {
+  const params = useParams();
   const searchParams = useSearchParams();
-  const playletId = params.playletId;
+  const playletId = (params?.playletId as string) || "";
   const router = useRouter();
 
   const urlToken = searchParams.get("t") || "";
@@ -23,13 +23,13 @@ export default function FlickReelsWatchPage() {
   const hlsRef = useRef<Hls | null>(null);
 
   useEffect(() => {
-    if (!session && urlToken) {
+    if (!session && urlToken && playletId) {
       router.replace(`/detail/flickreels/${playletId}`);
     }
   }, [session, urlToken, playletId, router]);
 
-  const { data: detailData } = useFlickReelsDetail(playletId || "");
-  const { data: episodeData, isLoading, error, refetch } = useFlickReelsEpisode(playletId || "", currentEpisode);
+  const { data: detailData } = useFlickReelsDetail(playletId);
+  const { data: episodeData, isLoading, error, refetch } = useFlickReelsEpisode(playletId, currentEpisode);
 
   const totalEpisodes = detailData?.totalEpisodes || 1;
   const title = detailData?.title || episodeData?.title || "FlickReels Lite";
@@ -91,7 +91,6 @@ export default function FlickReelsWatchPage() {
       <div className="absolute top-0 left-0 right-0 z-40 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/40 to-transparent h-28" />
         <div className="relative z-10 flex items-center justify-between h-16 px-4 max-w-7xl mx-auto pointer-events-auto">
-          {/* Back & Logo */}
           <Link 
             href={`/detail/flickreels/${playletId}`} 
             className="flex items-center gap-2.5 text-white/90 hover:text-white transition-all p-1.5 -ml-2 rounded-2xl hover:bg-white/10 group backdrop-blur-md bg-black/20 border border-white/5"
@@ -105,7 +104,6 @@ export default function FlickReelsWatchPage() {
             </span>
           </Link>
 
-          {/* Episode Title Info */}
           <div className="text-center flex-1 px-4 min-w-0">
             <h1 className="text-white font-semibold truncate text-xs sm:text-sm tracking-wide drop-shadow-md">
               {title}
@@ -118,7 +116,6 @@ export default function FlickReelsWatchPage() {
             </div>
           </div>
 
-          {/* Episode Drawer Toggle */}
           <button 
             onClick={() => setShowEpisodeList(!showEpisodeList)} 
             className="p-2.5 text-white/90 hover:text-white transition-all rounded-2xl bg-black/20 hover:bg-white/10 border border-white/5 backdrop-blur-md active:scale-95"
@@ -132,7 +129,6 @@ export default function FlickReelsWatchPage() {
       {/* Main Video Stage */}
       <div className="flex-1 w-full h-full relative bg-black flex items-center justify-center">
         <div className="relative w-full h-full flex items-center justify-center">
-          {/* Loading Indicator */}
           {isLoading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-black/40 backdrop-blur-xs">
               <div className="relative flex items-center justify-center">
@@ -143,7 +139,6 @@ export default function FlickReelsWatchPage() {
             </div>
           )}
 
-          {/* Error Screen */}
           {error && (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 z-20 bg-zinc-950/90 backdrop-blur-md">
               <div className="w-16 h-16 rounded-full bg-destructive/10 border border-destructive/20 flex items-center justify-center mb-4">
@@ -161,7 +156,6 @@ export default function FlickReelsWatchPage() {
             </div>
           )}
 
-          {/* Video Player */}
           <video 
             ref={videoRef} 
             className="w-full h-full object-contain max-h-[100dvh]" 
@@ -210,7 +204,6 @@ export default function FlickReelsWatchPage() {
             onClick={() => setShowEpisodeList(false)} 
           />
           <div className="fixed inset-y-0 right-0 w-80 max-w-[85vw] bg-zinc-950/95 border-l border-white/10 z-[70] flex flex-col shadow-2xl animate-in slide-in-from-right duration-300 backdrop-blur-2xl">
-            {/* Drawer Header */}
             <div className="p-4 border-b border-white/10 flex items-center justify-between sticky top-0 bg-zinc-950/80 backdrop-blur-md z-10">
               <div>
                 <h2 className="font-bold text-white text-base">Daftar Episode</h2>
@@ -224,7 +217,6 @@ export default function FlickReelsWatchPage() {
               </button>
             </div>
 
-            {/* Episode Grid */}
             <div className="p-4 flex-1 overflow-y-auto grid grid-cols-4 sm:grid-cols-5 gap-2.5 scrollbar-thin">
               {Array.from({ length: totalEpisodes }, (_, i) => i + 1).map((epNum) => {
                 const isActive = epNum === currentEpisode;
@@ -254,5 +246,17 @@ export default function FlickReelsWatchPage() {
         </>
       )}
     </main>
+  );
+}
+
+export default function FlickReelsWatchPage() {
+  return (
+    <Suspense fallback={
+      <div className="fixed inset-0 bg-black flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-primary animate-spin" />
+      </div>
+    }>
+      <FlickReelsWatchContent />
+    </Suspense>
   );
 }
