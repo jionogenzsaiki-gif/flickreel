@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { Search, X, Play } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useSearchDramas } from "@/hooks/useDramas";
 import { useReelShortSearch } from "@/hooks/useReelShort";
 import { useNetShortSearch } from "@/hooks/useNetShort";
@@ -136,13 +136,18 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 glass-strong">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <Play className="w-5 h-5 text-white fill-white" />
+          {/* Logo & Brand Name */}
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="relative w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
+              {/* Tempat Gambar Logo (Ganti /flickreels.webp dengan path gambar kamu di folder public) */}
+              <img
+                src="/flickreels.webp"
+                alt="FlickReels Lite Logo"
+                className="w-full h-full object-cover rounded-xl"
+              />
             </div>
             <span className="font-display font-bold text-xl gradient-text">
-              SekaiDrama
+              FlickReels Lite
             </span>
           </Link>
 
@@ -172,7 +177,7 @@ export function Header() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={`Cari drama di ${platformInfo.name}...`}
+                    placeholder="Cari drama..."
                     className="search-input pl-12"
                     autoFocus
                   />
@@ -183,14 +188,6 @@ export function Header() {
                 >
                   <X className="w-5 h-5" />
                 </button>
-              </div>
-
-              {/* Platform indicator */}
-              <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Mencari di:</span>
-                <span className="px-2 py-1 rounded-full bg-primary/20 text-primary font-medium">
-                  {platformInfo.name}
-                </span>
               </div>
 
               {/* Search Results */}
@@ -624,14 +621,14 @@ export function Header() {
 
                 {searchResults && searchResults.length === 0 && normalizedQuery && (
                   <div className="text-center py-12">
-                    <p className="text-muted-foreground">Tidak ada hasil untuk "{normalizedQuery}" di {platformInfo.name}</p>
+                    <p className="text-muted-foreground">Tidak ada hasil untuk "{normalizedQuery}"</p>
                   </div>
                 )}
 
                 {!normalizedQuery && (
                   <div className="text-center py-12">
                     <Search className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
-                    <p className="text-muted-foreground">Ketik untuk mencari drama di {platformInfo.name}</p>
+                    <p className="text-muted-foreground">Ketik untuk mencari drama</p>
                   </div>
                 )}
               </div>
