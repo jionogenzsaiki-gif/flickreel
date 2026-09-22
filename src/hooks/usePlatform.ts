@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 
-export type Platform = "pinedrama" | "dramabox" | "reelshort" | "shortmax" | "netshort" | "melolo" | "freereels" | "dramanova" | "goodshort" | "flickreels";
+export type Platform = "flickreels";
 
 export interface PlatformInfo {
   id: Platform;
@@ -13,75 +13,11 @@ export interface PlatformInfo {
 
 export const PLATFORMS: PlatformInfo[] = [
   {
-    id: "pinedrama",
-    name: "PineDrama",
-    logo: "/pinedrama.png",
-    apiBase: "/api/pinedrama",
-  },
-  {
-    id: "dramabox",
-    name: "DramaBox",
-    logo: "/dramabox.webp",
-    apiBase: "/api/dramabox",
-  },
-  {
-    id: "reelshort",
-    name: "ReelShort",
-    logo: "/reelshort.webp",
-    apiBase: "/api/reelshort",
-  },
-  {
-    id: "shortmax",
-    name: "ShortMax",
-    logo: "/shortmax.webp",
-    apiBase: "/api/shortmax",
-  },
-  {
-    id: "goodshort",
-    name: "GoodShort",
-    logo: "/goodshort.jpg",
-    apiBase: "/api/goodshort",
-  },
-  {
-    id: "netshort",
-    name: "NetShort",
-    logo: "/netshort.webp",
-    apiBase: "/api/netshort",
-  },
-
-  {
-    id: "melolo",
-    name: "Melolo",
-    logo: "/melolo.webp",
-    apiBase: "/api/melolo",
-  },
-
-  {
-    id: "freereels",
-    name: "FreeReels",
-    logo: "/freereels.webp",
-    apiBase: "/api/freereels",
-  },
-  {
     id: "flickreels",
     name: "FlickReels",
     logo: "/flickreels.webp",
     apiBase: "/api/flickreels",
   },
-  // api lagi error - 12-09-2026
-  // {
-  //   id: "dramanova",
-  //   name: "DramaNova",
-  //   logo: "/dramanova.png",
-  //   apiBase: "/api/dramanova",
-  // },
-  // [TEMPORARILY DISABLED] GoodShort - Dinonaktifkan sementara.
-  // {
-  //   id: "goodshort",
-  //   name: "GoodShort",
-  //   logo: "/goodshort.jpg",
-  //   apiBase: "/api/goodshort",
-  // },
 ];
 
 interface PlatformState {
@@ -90,7 +26,7 @@ interface PlatformState {
 }
 
 export const usePlatformStore = create<PlatformState>((set) => ({
-  currentPlatform: "pinedrama",
+  currentPlatform: "flickreels",
   setPlatform: (platform) => set({ currentPlatform: platform }),
 }));
 
@@ -108,15 +44,15 @@ export function usePlatform() {
     setPlatform,
     platforms: PLATFORMS,
     getPlatformInfo,
-    isPineDrama: currentPlatform === "pinedrama",
-    isDramaBox: currentPlatform === "dramabox",
-    isReelShort: currentPlatform === "reelshort",
-    isShortMax: currentPlatform === "shortmax",
-    isNetShort: currentPlatform === "netshort",
-    isMelolo: currentPlatform === "melolo",
-    isFreeReels: currentPlatform === "freereels",
-    isDramaNova: currentPlatform === "dramanova",
-    isGoodShort: currentPlatform === "goodshort",
-    isFlickReels: currentPlatform === "flickreels",
+    isPineDrama: false,
+    isDramaBox: false,
+    isReelShort: false,
+    isShortMax: false,
+    isNetShort: false,
+    isMelolo: false,
+    isFreeReels: false,
+    isDramaNova: false,
+    isGoodShort: false,
+    isFlickReels: true,
   };
 }
