@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Hls from "hls.js";
 import { getWatchSession, updateWatchSession } from "@/lib/watch-session";
+import { addToHistory } from "@/lib/history"; // <-- Terhubung ke helper storage
 
 function FlickReelsWatchContent() {
   const params = useParams();
@@ -33,7 +34,20 @@ function FlickReelsWatchContent() {
 
   const totalEpisodes = detailData?.totalEpisodes || 1;
   const title = detailData?.title || episodeData?.title || "FlickReels Lite";
+  const cover = detailData?.cover || "";
   const videoUrl = episodeData?.hlsUrl || null;
+
+  // --- OTOMATIS SIMPAN KE RIWAYAT SAAT DITONTON ---
+  useEffect(() => {
+    if (playletId && title) {
+      addToHistory({
+        id: playletId,
+        title: title,
+        cover: cover,
+        lastEpisode: currentEpisode,
+      });
+    }
+  }, [playletId, title, cover, currentEpisode]);
 
   const handleVideoEnded = useCallback(() => {
     const nextEp = currentEpisode + 1;
@@ -50,7 +64,6 @@ function FlickReelsWatchContent() {
     if (!videoUrl || !videoRef.current) return;
     const video = videoRef.current;
 
-    // 1. Bersihkan instansi Hls lama & Hentikan pemutaran sebelumnya
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
@@ -60,7 +73,6 @@ function FlickReelsWatchContent() {
     video.removeAttribute("src");
     video.load();
 
-    // 2. Inisialisasi Player Baru
     if (Hls.isSupported()) {
       const hls = new Hls({
         debug: false,
@@ -77,7 +89,6 @@ function FlickReelsWatchContent() {
         const playPromise = video.play();
         if (playPromise !== undefined) {
           playPromise.catch(() => {
-            // Jika diproteksi autoplay, jalankan mute dulu baru play
             video.muted = true;
             video.play().catch((err) => console.error("Autoplay Error:", err));
           });
@@ -100,7 +111,6 @@ function FlickReelsWatchContent() {
         }
       });
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      // Untuk browser yang mendukung Native HLS (misal Safari / iOS)
       video.src = videoUrl;
       video.load();
       video.play().catch(() => {
