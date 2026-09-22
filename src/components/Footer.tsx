@@ -16,7 +16,7 @@ export function Footer() {
     { label: "Beranda", href: "/", icon: Home },
     { label: "Untukmu", href: "/for-you", icon: Compass },
     { label: "Daftar Saya", href: "/my-list", icon: Bookmark },
-    { label: "Akun", href: "/profile", icon: User },
+    { label: "Akun", href: "/account", icon: User },
   ];
 
   return (
